@@ -1,0 +1,134 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <style>
+    body {
+      background: transparent;
+      font-family: 'Comic Sans MS', cursive, sans-serif;
+      color: #4D4039;
+      font-size: 20px;
+      padding: 20px;
+    }
+
+    .todo-list { /*boite pointillé*/
+      background-color: rgba(255, 255, 255, 0.1);
+      border: 2px dashed #C5B4DE;
+      border-radius: 20px;
+      padding: 20px;
+      width: 350px;
+      height: 160px;
+    }
+
+    h2 { /*titre*/
+      text-align: center;
+      color: #C5B4DE;
+      font-size: 20px;
+      margin: 0 0 16px 0; /* supprime la marge du haut */
+    }
+
+    .item { /*chaque ligne*/
+      display: flex;
+      align-items: center;
+      margin-bottom: 6px;
+      transition: transform 0.2s ease;
+    }
+
+    .item.pop { /*animation*/
+      animation: pop 0.3s ease;
+    }
+
+    @keyframes pop { /*animation*/
+      0% { transform: scale(1); }
+      50% { transform: scale(1.2); }
+      100% { transform: scale(1); }
+    }
+
+    .item input[type="checkbox"] { /*checkbox*/
+      transform: scale(1.5);
+      margin-right: 10px;
+      accent-color: #4D4039;
+    }
+
+    .item label {
+      cursor: pointer;
+    }
+  </style>
+
+  <!-- Firebase v8 SDK (fonctionne avec navigateur sans modules) -->
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+</head>
+
+  <script>
+    // Configuration Firebase
+   const firebaseConfig = {
+     apiKey: "AIzaSyC0nKvVesC45QGoh19-M4t9op3cRyY2Akc",
+     authDomain: "todo-ddv-widget.firebaseapp.com",
+     projectId: "todo-ddv-widget",
+     storageBucket: "todo-ddv-widget.firebasestorage.app",
+     messagingSenderId: "497804442763",
+     appId: "1:497804442763:web:02670c13bc03e676aca88e"
+   };
+
+    // Initialiser Firebase
+    const app = firebase.initializeApp(firebaseConfig);
+    const database = firebase.database();
+
+    // Fonction pour mettre à jour le statut de la tâche dans Firebase
+    function updateTaskStatus(checkbox) {
+      const taskId = checkbox.id;
+      const taskChecked = checkbox.checked;
+
+      // Mise à jour du statut de la tâche dans la base de données Firebase
+      database.ref('tasks/' + taskId).set({
+        checked: taskChecked
+      });
+
+      // Animation
+      const item = checkbox.parentElement;
+      item.classList.remove('pop'); // reset animation
+      void item.offsetWidth; // trigger reflow
+      item.classList.add('pop');
+    }
+
+    // Fonction pour charger l'état initial des tâches depuis Firebase
+    function loadTaskStates() {
+      const tasksRef = database.ref('tasks');
+      tasksRef.on('value', (snapshot) => {
+        const tasks = snapshot.val();
+        for (const taskId in tasks) {
+          const task = tasks[taskId];
+          const checkbox = document.getElementById(taskId);
+          if (checkbox) {
+            checkbox.checked = task.checked;
+          }
+        }
+      });
+    }
+
+    // Charger l'état initial des tâches au chargement de la page
+    window.onload = loadTaskStates;
+  </script>
+
+<body>
+  <div class="todo-list">
+    <h2>✨ Objectifs Disney Dreamlight ✨</h2>
+    <div class="item">
+      <input type="checkbox" id="task1" onclick="updateTaskStatus(this)">
+      <label for="task1">Finir la quête "matériaux de construction" du CC</label>
+    </div>
+    <div class="item">
+      <input type="checkbox" id="task2" onclick="updateTaskStatus(this)">
+      <label for="task2">Améliorer la pioche</label>
+    </div>
+    <div class="item">
+      <input type="checkbox" id="task3" onclick="updateTaskStatus(this)">
+      <label for="task3">Amélioration la relation avec Sam</label>
+    </div>
+  </div>
+
+  
+</body>
+</html>
